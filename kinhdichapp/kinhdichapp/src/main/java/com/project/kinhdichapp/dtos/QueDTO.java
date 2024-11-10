@@ -4,6 +4,8 @@ package com.project.kinhdichapp.dtos;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import jakarta.validation.constraints.NotNull;
+import java.util.Date;
+
 
 @Data // To String
 @Getter
@@ -53,6 +55,13 @@ public class QueDTO {
 
     @JsonProperty("dong_6")
     private int dong6;
+
+    @JsonProperty("selectedDate")
+    private Date selectedDate;
+
+    @JsonProperty("selectedTime")
+    private String selectedTime;    // Example: "23h-1h" or an hour string
+
 
     // Constructor sao chép
     public QueDTO(QueDTO clone) {

@@ -1,5 +1,8 @@
 package com.project.kinhdichapp.controllers;
 
+import com.project.kinhdichapp.algorithym.Lunar;
+import com.project.kinhdichapp.algorithym.LunarSolarConverter;
+import com.project.kinhdichapp.algorithym.Solar;
 import com.project.kinhdichapp.dtos.QueDTO;
 import com.project.kinhdichapp.models.Que;
 import com.project.kinhdichapp.models.ResponseObject;
@@ -11,6 +14,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +55,27 @@ public class QueControllers {
                     new ResponseObject("Failed", "Không tìm thấy quẻ", errorMessages)
             );
         }
+        // Xử lý Date time convert từ dương lịch sang âm lịch , và trả về Can Chi
+        Solar solar = new Solar();
+        String selectedTime = queDTO.getSelectedTime();
+        Date selectedDate = queDTO.getSelectedDate();  // Or your specific date object
+        LocalDate localDate = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(); // convert Date
+
+        solar.solarYear = localDate.getYear();
+        solar.solarMonth = localDate.getMonthValue();
+        solar.solarDay = localDate.getDayOfMonth();
+
+        // Chuyển từ dương lịch sang âm lịch
+        Lunar lunar = LunarSolarConverter.SolarToLunar(solar);
 
         // Trả về Que Goc , Que Bien (neu co')
         // Tạo đối tượng chứa cả Quẻ Gốc và Quẻ Biến
         Map<String, Object> queData = new HashMap<>();
         queData.put("QueGoc", queService.getQueByDTO(queDTO));
         queData.put("QueBien", queService.getQueBienDTO(queDTO));
+        queData.put("AmLich", lunar);
+        queData.put("DuongLich", solar);
+        queData.put("GioLapQue", selectedTime);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("ok", "Successfully!", queData)
